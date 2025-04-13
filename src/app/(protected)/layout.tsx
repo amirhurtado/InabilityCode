@@ -1,4 +1,3 @@
-import Header from "@/components/Header";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -12,7 +11,6 @@ const ProtectedLayout = async ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div>
-      <Header />
       {children}
     </div>
   );

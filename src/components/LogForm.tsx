@@ -14,12 +14,21 @@ const LogForm = ({ type }: { type: string }) => {
   } = useForm<logsProps>();
   const [seePassword, setSeePassword] = useState(false);
 
+
+  const onSubmit = async (data: logsProps) => {
+    if (type === "register") {
+      await onSubmitRegister(data);
+    } else {
+      await onSubmitLogIn(data);
+    }
+  };
+
   const handleSeePassword = () => {
     setSeePassword(!seePassword);
   };
 
   return (
-    <form className="flex flex-col gap-6 " onSubmit={() => type === "register" ? handleSubmit(onSubmitRegister) : handleSubmit(onSubmitLogIn)}>
+    <form className="flex flex-col gap-6 " onSubmit={handleSubmit(onSubmit)}>
       {type === "register" && (
         <div className="flex flex-col gap-2">
           <label htmlFor="username" className="text-sm text-slate-500">

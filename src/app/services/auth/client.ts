@@ -1,9 +1,11 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
-import { auth } from "../../../../lib/firebase";
+import { auth, db } from "../../../../lib/firebase";
 import { setAuthCookie } from "@/app/services/auth/actions";
+import { doc, setDoc } from "firebase/firestore";
 
 export const onSubmitRegister = async (data: logsProps) => {
   try {
@@ -12,14 +14,27 @@ export const onSubmitRegister = async (data: logsProps) => {
       data.email,
       data.password
     );
+    await updateProfile(userCred.user, {
+        displayName: data.username,
+    })
+
+    await setDoc(doc(db, "users", userCred.user.uid), {
+        username: data.username,
+        email: data.email,
+        createdAt: new Date().toISOString(),
+    })
+    
     const token = await userCred.user.getIdToken();
     await setAuthCookie(token);
+
+  
   } catch (e) {
     console.log(e);
   }
 };
 
 export const onSubmitLogIn = async (data: logsProps) => {
+    console.log("LOGIN", data);
     try {
       const userCred = await signInWithEmailAndPassword(
         auth,

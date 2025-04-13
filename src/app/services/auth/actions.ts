@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect} from "next/navigation";
+import { adminAuth, adminDb } from "../../../../lib/firebaseAdmin";
 
 
 export const setAuthCookie = async (token: string) => {
@@ -14,8 +15,35 @@ export const setAuthCookie = async (token: string) => {
         path: '/',
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 60 * 60 * 24, // 1 day
+        maxAge: 60 * 60 * 24, 
     })
 
     redirect('/dashboard');
+}
+
+export const getUser = async () => {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth-token')?.value;
+    if(!token) return null;
+
+    try{
+        const decode = await adminAuth.verifyIdToken(token);
+        const userId = decode.uid;
+
+        const snap = await adminDb.collection('users').doc(userId).get();
+        if(!snap.exists) return null;
+        const userData = snap.data();
+        if(!userData) return null;
+
+        return userData;
+
+    }catch{
+        return null;
+    }
+}
+
+export const logout = async () => {
+    const cookieStore = await cookies();
+    cookieStore.delete('auth-token');
+    redirect('/');
 }

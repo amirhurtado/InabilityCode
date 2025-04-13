@@ -1,7 +1,6 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  updateProfile,
 } from "firebase/auth";
 import { auth, db } from "../../../../lib/firebase";
 import { setAuthCookie } from "@/app/services/auth/actions";
@@ -14,10 +13,7 @@ export const onSubmitRegister = async (data: logsProps) => {
       data.email,
       data.password
     );
-    await updateProfile(userCred.user, {
-        displayName: data.username,
-    })
-
+  
     await setDoc(doc(db, "users", userCred.user.uid), {
         username: data.username,
         email: data.email,

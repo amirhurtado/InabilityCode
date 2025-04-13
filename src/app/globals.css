@@ -48,7 +48,6 @@ body {
   width: 100vw;
   margin: 0;
   padding: 0;
-  background-color: #000
 
 }
 
@@ -131,5 +130,7 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
-  
+  body {
+    @apply bg-background text-foreground;
+  }
 }

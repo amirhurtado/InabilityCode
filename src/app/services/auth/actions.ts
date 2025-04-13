@@ -1,9 +1,10 @@
+'use server';
+
 import { cookies } from "next/headers";
 import { redirect} from "next/navigation";
 
 
 export const setAuthCookie = async (token: string) => {
-    'use server';
 
     const cookieStore = await cookies();
     cookieStore.set({
@@ -16,5 +17,5 @@ export const setAuthCookie = async (token: string) => {
         maxAge: 60 * 60 * 24, // 1 day
     })
 
-    redirect('/protected');
+    redirect('/dashboard');
 }

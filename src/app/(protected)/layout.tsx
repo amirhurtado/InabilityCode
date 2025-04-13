@@ -1,7 +1,15 @@
 import Header from "@/components/Header";
-import React from "react";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-const layout = ({ children }: { children: React.ReactNode }) => {
+const ProtectedLayout = async ({ children }: { children: React.ReactNode }) => { 
+  const cookieStore = await cookies(); 
+  const authToken = cookieStore.get("auth-token")?.value; 
+
+  if (!authToken) {
+    redirect('/login');
+  }
+
   return (
     <div>
       <Header />
@@ -10,4 +18,4 @@ const layout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default layout;
+export default ProtectedLayout;

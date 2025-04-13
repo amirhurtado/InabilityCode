@@ -18,15 +18,18 @@ export default function RootLayout({
     <>
       <html lang="en" suppressHydrationWarning>
         <head />
-        <body>
+        <body >
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
           >
+            <div className="container gap-10">
             <Header />
             {children}
+            </div>
+           
           </ThemeProvider>
         </body>
       </html>

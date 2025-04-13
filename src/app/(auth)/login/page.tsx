@@ -2,7 +2,7 @@ import React from "react";
 
 const LogIn = () => {
   return (
-    <h1>Login</h1>
+    <h1 className="text-xl">Login</h1>
   );
 };
 

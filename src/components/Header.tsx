@@ -4,7 +4,6 @@ import { ModeToggle } from "./ModeToggle";
 
 const Header = () => {
   return (
-    <div className="container">
       <div className="flex justify-between items-center">
         <div className="relative h-20  w-full">
           <Image
@@ -16,7 +15,6 @@ const Header = () => {
         </div>
         <ModeToggle />
       </div>
-    </div>
   );
 };
 

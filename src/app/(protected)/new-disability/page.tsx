@@ -5,6 +5,7 @@ import { Input } from "@/components/Input";
 import { Textarea } from "@/components/Textarea";
 import { Button } from "@/components/Button";
 import Link from "next/link";
+import { validateDisabilityServer } from "@/app/services/disability/client";
 
 interface FormData {
   type: string;
@@ -30,25 +31,27 @@ export default function NewDisability() {
   const disabilityType = watch("type");
 
   const onSubmit = async (data: FormData) => {
-    const pdfFile = data.disabilityPDF?.[0];
-    if (!pdfFile) {
-      alert("Debe adjuntar el archivo de incapacidad.");
+    console.log("Form data:", data);
+    const formData = new FormData();
+    formData.append("type", data.type);
+    formData.append("startDate", data.startDate);
+    formData.append("endDate", data.endDate);
+    formData.append("observations", data.observations || "");
+    if (data.disabilityPDF?.[0]) formData.append("disabilityPDF", data.disabilityPDF[0]);
+    if (data.furipsPDF?.[0]) formData.append("furipsPDF", data.furipsPDF[0]);
+    if (data.medicalCertPDF?.[0]) formData.append("medicalCertPDF", data.medicalCertPDF[0]);
+    if (data.birthCertPDF?.[0]) formData.append("birthCertPDF", data.birthCertPDF[0]);
+    if (data.liveBirthCertPDF?.[0]) formData.append("liveBirthCertPDF", data.liveBirthCertPDF[0]);
+    if (data.motherIdPDF?.[0]) formData.append("motherIdPDF", data.motherIdPDF[0]);
+
+    const result = await validateDisabilityServer(formData);
+
+    if (!result.success && result.errors) {
+      alert("Errores encontrados:\n" + result.errors.join("\n"));
       return;
     }
 
-    const arrayBuffer = await pdfFile.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    console.log("Buffer listo para validar PDF", buffer);
-    console.log({
-      type: data.type,
-      dates: {
-        start: data.startDate,
-        end: data.endDate,
-      },
-      observations: data.observations,
-      file: data.disabilityPDF?.[0],
-    });
+    alert("PDF validado correctamente. Listo para guardar en la base de datos.");
   };
 
   return (

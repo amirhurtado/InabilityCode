@@ -3,8 +3,9 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { onSubmitLogIn, onSubmitRegister } from "@/app/services/auth/client";
+import { getFirebaseErrorMessage } from "@/lib/firebaseError";
 
 const LogForm = ({ type }: { type: string }) => {
   const {
@@ -13,13 +14,23 @@ const LogForm = ({ type }: { type: string }) => {
     formState: { errors },
   } = useForm<logsProps>();
   const [seePassword, setSeePassword] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setErrorMessage] = useState("");
 
   const onSubmit = async (data: logsProps) => {
-    if (type === "register") {
-      await onSubmitRegister(data);
-    } else {
-      await onSubmitLogIn(data);
+    setIsLoading(true);
+
+    try {
+      if (type === "register") {
+        await onSubmitRegister(data);
+      } else {
+        await onSubmitLogIn(data);
+      }
+    } catch (error) {
+      const errorMessage = getFirebaseErrorMessage(error);
+      setErrorMessage(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -28,7 +39,11 @@ const LogForm = ({ type }: { type: string }) => {
   };
 
   return (
-    <form className="flex flex-col gap-6 " onSubmit={handleSubmit(onSubmit)}>
+    <form className="flex flex-col gap-6 relative" onSubmit={handleSubmit(onSubmit)}>
+      {error && (
+        <span className="absolute top-[-3rem] text-red-500 text-md">{error}</span>
+      )}
+
       {type === "register" && (
         <div className="flex flex-col gap-2">
           <label htmlFor="username" className="text-sm text-slate-500">
@@ -37,11 +52,13 @@ const LogForm = ({ type }: { type: string }) => {
           <Input
             placeholder="Username"
             type="text"
-            {...register("username", { required: true })}
+            {...register("username", { required: "El nombre de usuario es requerido" })}
           />
 
           {errors.username && (
-            <span className="text-red-500 text-sm">This field is required</span>
+            <span className="!text-red-500 text-sm">
+              {errors.username.message}
+            </span>
           )}
         </div>
       )}
@@ -53,10 +70,10 @@ const LogForm = ({ type }: { type: string }) => {
         <Input
           placeholder="Email"
           type="email"
-          {...register("email", { required: true })}
+          {...register("email", { required: "El email es requerido" })}
         />
         {errors.email && (
-          <span className="text-red-500 text-sm">This field is required</span>
+          <span className="!text-red-500 text-sm">{errors.email.message}</span>
         )}
       </div>
 
@@ -67,10 +84,12 @@ const LogForm = ({ type }: { type: string }) => {
         <Input
           placeholder="Contraseña"
           type={seePassword ? "text" : "password"}
-          {...register("password", { required: true, minLength: 5 })}
+          {...register("password", { required: "El contraseña es requerida", minLength: { value: 6, message: "La contraseña debe tener al menos 6 caracteres" } })}
         />
         {errors.password && (
-          <span className="text-red-500 text-sm">This field is required</span>
+          <span className="!text-red-500 text-sm">
+            {errors.password.message}
+          </span>
         )}
         <div className="absolute right-3 top-[2.2rem] ">
           {seePassword ? (
@@ -86,7 +105,11 @@ const LogForm = ({ type }: { type: string }) => {
         variant="default"
         className="w-full mt-8 cursor-pointer"
       >
-        Crear cuenta
+        {isLoading ? (
+          <LoaderCircle className="animate-spin" size={20} />
+        ) : (
+          <span>{type === "register" ? "Registrate" : "Iniciar sesion"}</span>
+        )}
       </Button>
     </form>
   );

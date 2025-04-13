@@ -25,12 +25,11 @@ export const onSubmitRegister = async (data: logsProps) => {
 
   
   } catch (e) {
-    console.log(e);
+    throw e;
   }
 };
 
 export const onSubmitLogIn = async (data: logsProps) => {
-    console.log("LOGIN", data);
     try {
       const userCred = await signInWithEmailAndPassword(
         auth,
@@ -40,7 +39,7 @@ export const onSubmitLogIn = async (data: logsProps) => {
       const token = await userCred.user.getIdToken();
       await setAuthCookie(token);
     } catch (e) {
-      console.log(e);
+      throw e;
     }
   };
   

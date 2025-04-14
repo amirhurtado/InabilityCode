@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { updateStatusAndNotify } from "@/app/services/disability/actions";
 import { updateDisabilityStatus } from "@/app/services/disability/actions";
 import {
   AlertDialog,
@@ -14,8 +15,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/Textarea";
 
+
 type Props = {
   id: string;
+  email: string | undefined;
   currentStatus: string;
   onStatusChange: (newStatus: string) => void;
 };
@@ -43,7 +46,7 @@ const getColorForStatus = (status: string) => {
   }
 };
 
-export const StatusSelectCell = ({ id, currentStatus, onStatusChange }: Props) => {
+export const StatusSelectCell = ({ id, email, currentStatus, onStatusChange }: Props) => {
   const [localStatus, setLocalStatus] = useState(currentStatus);
   const [nextStatus, setNextStatus] = useState<string | null>(null);
   const [showDialog, setShowDialog] = useState(false);
@@ -62,7 +65,17 @@ export const StatusSelectCell = ({ id, currentStatus, onStatusChange }: Props) =
 
   const processStatusChange = async (newStatus: string, motivo?: string) => {
     setLoading(true);
-    await updateDisabilityStatus(id, newStatus, motivo); 
+  
+    if (newStatus === "rechazada" && motivo && email) {
+      await fetch("/api/disability/update-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, newStatus, motivo, toEmail: email }),
+      });
+    } else {
+      await updateDisabilityStatus(id, newStatus);
+    }
+  
     setLocalStatus(newStatus);
     onStatusChange(newStatus);
     setLoading(false);
@@ -108,6 +121,7 @@ export const StatusSelectCell = ({ id, currentStatus, onStatusChange }: Props) =
               onClick={async () => {
                 if (nextStatus) {
                   await processStatusChange(nextStatus, reason.trim());
+                  
                   setReason("");
                   setShowDialog(false);
                 }

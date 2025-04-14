@@ -27,6 +27,8 @@ export default function HistorialGlobalAuxAdmin() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [search, setSearch] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const columns: ColumnDef<DisabilityProps>[] = [
     {
@@ -56,6 +58,7 @@ export default function HistorialGlobalAuxAdmin() {
       cell: ({ row }) => (
         <StatusSelectCell
           id={row.original.id}
+          email= {row.original.email}
           currentStatus={row.original.status}
           onStatusChange={(newStatus) => {
             const updated = [...data];
@@ -131,7 +134,14 @@ export default function HistorialGlobalAuxAdmin() {
     const matchSearch = item.email
       ?.toLowerCase()
       .includes(search.toLowerCase());
-    return matchStatus && matchSearch;
+
+    const itemStartDate = new Date(item.startDate);
+    const matchStart =
+      !startDate || itemStartDate >= new Date(startDate + "T00:00");
+    const matchEnd =
+      !endDate || itemStartDate <= new Date(endDate + "T23:59");
+
+    return matchStatus && matchSearch && matchStart && matchEnd;
   });
 
   const table = useReactTable({
@@ -159,7 +169,7 @@ export default function HistorialGlobalAuxAdmin() {
             </div>
 
             <HistorialFilters
-            isAdmin = {true}
+              isAdmin={true}
               search={search}
               onSearchChange={setSearch}
               allStatuses={allStatuses}
@@ -171,6 +181,10 @@ export default function HistorialGlobalAuxAdmin() {
                     : [...prev, status]
                 );
               }}
+              startDate={startDate}
+              endDate={endDate}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
             />
           </div>
 

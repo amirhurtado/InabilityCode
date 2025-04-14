@@ -8,38 +8,54 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET!,
 });
 
+async function uploadToCloudinary(file: File, name: string): Promise<string> {
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  const result = await new Promise<any>((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      {
+        folder: "incapacidades",
+        resource_type: "auto",
+        public_id: `${name}_${Date.now()}`,
+      },
+      (error, result) => {
+        if (error || !result) return reject(error);
+        resolve(result);
+      }
+    ).end(buffer);
+  });
+
+  return result.secure_url;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const file = formData.get("disabilityPDF") as File;
 
-    if (!file) {
-      return NextResponse.json({ success: false, errors: ["Debe subir un archivo PDF."] }, { status: 400 });
+    const files = {
+      disabilityPDF: formData.get("disabilityPDF") as File | null,
+      furipsPDF: formData.get("furipsPDF") as File | null,
+      medicalCertPDF: formData.get("medicalCertPDF") as File | null,
+      birthCertPDF: formData.get("birthCertPDF") as File | null,
+      liveBirthCertPDF: formData.get("liveBirthCertPDF") as File | null,
+      motherIdPDF: formData.get("motherIdPDF") as File | null,
+    };
+
+    const uploadedUrls: Record<string, string> = {};
+
+    for (const [key, file] of Object.entries(files)) {
+      if (file) {
+        const url = await uploadToCloudinary(file, key);
+        uploadedUrls[key] = url;
+      }
     }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    const uploadResult = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        {
-          folder: "incapacidades",
-          resource_type: "auto", 
-          public_id: `disability_${Date.now()}`, 
-        },
-        (error, result) => {
-          if (error || !result) return reject(error);
-          resolve(result);
-        }
-      ).end(buffer);
-      
-    });
 
     return NextResponse.json({
       success: true,
-      pdfUrl: uploadResult.secure_url,
+      ...uploadedUrls,
     });
   } catch (error) {
-    console.error("❌ Error subiendo a Cloudinary:", error);
-    return NextResponse.json({ success: false, errors: ["Error subiendo archivo."] }, { status: 500 });
+    console.error("❌ Error subiendo archivos a Cloudinary:", error);
+    return NextResponse.json({ success: false, errors: ["Error subiendo archivos."] }, { status: 500 });
   }
 }

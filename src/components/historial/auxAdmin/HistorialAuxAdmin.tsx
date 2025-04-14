@@ -6,23 +6,21 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   useReactTable,
-  flexRender,
 } from "@tanstack/react-table";
+import HistorialTableAuxAdmin from "../HistorialTable";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { auth } from "../../../lib/firebase";
+import { auth } from "../../../../lib/firebase";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/Table";
-import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/HoverCard";
 import { formatDate } from "@/lib/utils";
-import { Button } from "../Button";
-import HistorialSkeleton from "./HistorialSkeleton";
+import { Button } from "../../Button";
+import HistorialSkeleton from "../HistorialSkeleton";
 import { ListFilter, Table2 } from "lucide-react";
 
-import { getLabelFromKey } from "@/lib/utils";
 import { getUserInfo } from "@/app/services/disability/client";
 
 import { StatusSelectCell } from "./StatusSelectCell";
+import IncapacityFilesCell from "../IncapacityFilesCell";
 
 export default function HistorialGlobalAuxAdmin() {
   const [data, setData] = useState<DisabilityProps[]>([]);
@@ -71,8 +69,6 @@ export default function HistorialGlobalAuxAdmin() {
         />
       ),
     },
-    
-    
     {
       accessorKey: "files",
       header: "Documentos",
@@ -81,30 +77,7 @@ export default function HistorialGlobalAuxAdmin() {
         if (!files)
           return <span className="text-sm text-muted-foreground">Sin documentos</span>;
   
-        return (
-          <div className="flex flex-col gap-2">
-            {Object.entries(files).map(([key, url]) => (
-              <div key={key} className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground capitalize w-[10rem]">
-                  {getLabelFromKey(key)}
-                </span>
-                <HoverCard>
-                  <HoverCardTrigger asChild>
-                    <Button
-                      variant="link"
-                      className="text-sm text-primary hover:underline p-0 h-auto"
-                    >
-                      Ver PDF
-                    </Button>
-                  </HoverCardTrigger>
-                  <HoverCardContent className="w-[400px] h-[300px] p-0">
-                    <iframe src={url} width="100%" height="100%" />
-                  </HoverCardContent>
-                </HoverCard>
-              </div>
-            ))}
-          </div>
-        );
+        return  <IncapacityFilesCell files={files} />;
       },
     },
   ];
@@ -200,46 +173,7 @@ export default function HistorialGlobalAuxAdmin() {
           </div>
 
           <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead
-                        key={header.id}
-                        className="font-semibold text-md uppercase text-primary"
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id}>
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="text-center text-slate-500 py-10"
-                    >
-                      No se encontraron registros.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+            <HistorialTableAuxAdmin table={table} columns={columns} />
           </div>
         </div>
       )}

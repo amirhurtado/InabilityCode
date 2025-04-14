@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/Button";
 import { Send } from "lucide-react";
-import Historial from "@/components/historial/Historial";
+import Historial from "@/components/historial/user/Historial";
 
 const Home = () => {
   return (

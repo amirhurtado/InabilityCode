@@ -1,4 +1,4 @@
-import HistorialGlobalAuxAdmin from "@/components/historial/HistorialAuxAdmin"
+import HistorialGlobalAuxAdmin from "@/components/historial/auxAdmin/HistorialAuxAdmin"
 
 const page = () => {
   return (

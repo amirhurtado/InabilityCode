@@ -18,7 +18,13 @@ export const setAuthCookie = async (token: string) => {
         maxAge: 60 * 60 * 24, 
     })
 
-    redirect('/dashboard');
+    const user = await getUser();
+
+  if (user?.role === "auxAdmin") {
+    redirect("/dashboard-auxAdmin");
+  } else {
+    redirect("/dashboard");
+  }
 }
 
 export const getUser = async () => {

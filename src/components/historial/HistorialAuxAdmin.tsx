@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { auth } from "../../../lib/firebase";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -11,11 +10,12 @@ import {
 import {
   getFirestore,
   collection,
-  query,
-  where,
   getDocs,
+  doc,
+  getDoc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../../lib/firebase";
 
 import {
   Table,
@@ -37,6 +37,9 @@ import { Table2 } from "lucide-react";
 
 interface Incapacidad {
   id: string;
+  userId: string;
+  username?: string;
+  email?: string;
   type: string;
   startDate: string;
   endDate: string;
@@ -58,6 +61,15 @@ function getLabel(key: string) {
 }
 
 const columns: ColumnDef<Incapacidad>[] = [
+  {
+    accessorKey: "username",
+    header: "Colaborador",
+    cell: ({ row }) => (
+      <span className="text-slate-700 text-sm">
+        {row.original.username || row.original.email || "Sin info"}
+      </span>
+    ),
+  },
   {
     accessorKey: "type",
     header: "Tipo",
@@ -122,44 +134,62 @@ const columns: ColumnDef<Incapacidad>[] = [
   },
 ];
 
-export default function Historial() {
-
+export default function HistorialGlobalAuxAdmin() {
   const [data, setData] = useState<Incapacidad[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const user = auth.currentUser;
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-  
-        const db = getFirestore();
-        const q = query(
-          collection(db, "incapacidades"),
-          where("userId", "==", user.uid)
-        );
-        const querySnapshot = await getDocs(q);
-  
-        const docs = querySnapshot.docs.map((doc) => {
-          const d = doc.data();
-          return {
-            id: doc.id,
-            type: d.type,
-            startDate: d.startDate,
-            endDate: d.endDate,
-            observations: d.observations,
-            status: d.status,
-            files: d.files,
-          };
-        });
-  
-        setData(docs);
+        fetchData();
+      } else {
         setIsLoading(false);
       }
     });
-  
-    return () => unsubscribe(); 
+
+    return () => unsubscribe();
   }, []);
-  
+
+  const fetchData = async () => {
+    const db = getFirestore();
+
+    const snapshot = await getDocs(collection(db, "incapacidades"));
+
+    const solicitudes = await Promise.all(
+      snapshot.docs.map(async (docSnap) => {
+        const d = docSnap.data();
+        let username = "";
+        let email = "";
+
+        try {
+          const userDoc = await getDoc(doc(db, "users", d.userId));
+          if (userDoc.exists()) {
+            const u = userDoc.data();
+            username = u.username || "";
+            email = u.email || "";
+          }
+        } catch (err) {
+          console.error("Error trayendo user info:", err);
+        }
+
+        return {
+          id: docSnap.id,
+          userId: d.userId,
+          username,
+          email,
+          type: d.type,
+          startDate: d.startDate,
+          endDate: d.endDate,
+          observations: d.observations,
+          status: d.status,
+          files: d.files,
+        };
+      })
+    );
+
+    setData(solicitudes);
+    setIsLoading(false);
+  };
 
   const table = useReactTable({
     data,
@@ -175,12 +205,11 @@ export default function Historial() {
         <div className="flex flex-col gap-8">
           <div className="flex gap-2 text-slate-500">
             <Table2 size={24} />
-            <h2 className="text-lg ">
-            Historial de incapacidades de <span className="italic underline">{user?.email}</span> 
-          </h2>
-
+            <h2 className="text-lg font-semibold text-primary">
+              Historial global de incapacidades
+            </h2>
           </div>
-         
+
           <div className="rounded-md border">
             <Table>
               <TableHeader>

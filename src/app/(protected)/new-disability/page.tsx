@@ -5,7 +5,8 @@ import { Input } from "@/components/Input";
 import { Textarea } from "@/components/Textarea";
 import { Button } from "@/components/Button";
 import Link from "next/link";
-import { validateDisabilityServer } from "@/app/services/disability/client";
+import { validateDisabilityServer, saveDisabilityToFirestore } from "@/app/services/disability/client";
+
 
 interface FormData {
   type: string;
@@ -51,7 +52,16 @@ export default function NewDisability() {
       return;
     }
 
-    alert("PDF validado correctamente. Listo para guardar en la base de datos.");
+    await saveDisabilityToFirestore({
+      type: data.type,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      observations: data.observations,
+      pdfUrl: result.pdfUrl!,
+    });
+
+    alert("Incapacidad enviada exitosamente.");
+
   };
 
   return (
@@ -139,6 +149,8 @@ export default function NewDisability() {
           <Link href={'/dashboard'}>Cancelar</Link>
         </Button>
       </div>
+
+      
     </form>
   );
 }

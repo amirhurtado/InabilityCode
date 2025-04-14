@@ -1,79 +1,45 @@
-import { NextRequest, NextResponse } from 'next/server';
-import pdfParse from 'pdf-parse';
+// app/api/disability/validate/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
 
-interface ValidationResponse {
-  success: boolean;
-  errors?: string[];
-}
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
 
-export async function POST(req: NextRequest): Promise<NextResponse<ValidationResponse>> {
+export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const type = formData.get('type')?.toString();
-    const file = formData.get('disabilityPDF') as File;
+    const file = formData.get("disabilityPDF") as File;
 
-    const furips = formData.get('furipsPDF') as File | null;
-    const birthCert = formData.get('birthCertPDF') as File | null;
-    const liveBirth = formData.get('liveBirthCertPDF') as File | null;
-    const motherId = formData.get('motherIdPDF') as File | null;
-
-    const errors: string[] = [];
-
-    if (!type) {
-      errors.push("Tipo de incapacidad no especificado.");
-    }
     if (!file) {
-      errors.push("El archivo principal de incapacidad es obligatorio.");
-    }
-    if (errors.length > 0) {
-      return NextResponse.json({ success: false, errors }, { status: 400 });
+      return NextResponse.json({ success: false, errors: ["Debe subir un archivo PDF."] }, { status: 400 });
     }
 
-    // Leer texto del PDF principal
     const buffer = Buffer.from(await file.arrayBuffer());
-    const result = await pdfParse(buffer);
-    const text = result.text;
 
-    // Validaciones comunes
-    if (!/diagn[oó]stico/i.test(text)) {
-      errors.push("El PDF no contiene un diagnóstico válido.");
-    }
-    if (!/(\bd[ií]as\b|duraci[oó]n)/i.test(text)) {
-      errors.push("El PDF no menciona los días de incapacidad.");
-    }
-    if (!/(nombre|paciente|identificaci[oó]n)/i.test(text)) {
-      errors.push("Falta nombre o identificación del paciente.");
-    }
-
-    // Validaciones por tipo
-    switch (type) {
-      case "Licencia de maternidad":
-        if (!/gestaci[oó]n|parto/i.test(text)) {
-          errors.push("Debe indicar semanas de gestación o fecha de parto.");
+    const uploadResult = await new Promise<any>((resolve, reject) => {
+      cloudinary.uploader.upload_stream(
+        {
+          folder: "incapacidades",
+          resource_type: "auto", 
+          public_id: `disability_${Date.now()}`, 
+        },
+        (error, result) => {
+          if (error || !result) return reject(error);
+          resolve(result);
         }
-        break;
-      case "Accidente de tránsito":
-        if (!furips) {
-          errors.push("Debe adjuntar el documento FURIPS.");
-        }
-        break;
-      case "Licencia de paternidad":
-        if (!birthCert || !liveBirth || !motherId) {
-          errors.push("Debe adjuntar el registro civil, certificado de nacido vivo y cédula de la madre.");
-        }
-        break;
-    }
+      ).end(buffer);
+      
+    });
 
-    if (errors.length > 0) {
-      return NextResponse.json({ success: false, errors }, { status: 400 });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("Error validando PDF:", err);
-    return NextResponse.json(
-      { success: false, errors: ["El PDF no contiene la informacion requerida."] },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: true,
+      pdfUrl: uploadResult.secure_url,
+    });
+  } catch (error) {
+    console.error("❌ Error subiendo a Cloudinary:", error);
+    return NextResponse.json({ success: false, errors: ["Error subiendo archivo."] }, { status: 500 });
   }
 }

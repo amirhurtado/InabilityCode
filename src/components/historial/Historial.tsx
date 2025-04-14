@@ -169,9 +169,9 @@ export default function Historial() {
         <HistorialSkeleton />
       ) : (
         <div className="flex flex-col gap-8">
-          <div>
-            <Table />
-            <h2 className="text-lg text-slate-500">
+          <div className="flex gap-2 text-slate-500">
+            <Table2 size={24} />
+            <h2 className="text-lg ">
             Historial de incapacidades de <span className="italic underline">{user?.email}</span> 
           </h2>
 

@@ -18,8 +18,30 @@ import {
   TableRow,
 } from "@/components/Table";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/HoverCard";
+import { formatDate } from "@/lib/utils";
 import { Button } from "../Button";
 
+interface Incapacidad {
+  id: string;
+  type: string;
+  startDate: string;
+  endDate: string;
+  observations: string;
+  status: string;
+  files?: Record<string, string>;
+}
+
+function getLabel(key: string) {
+  const labels: Record<string, string> = {
+    disabilityPDF: "Certificado de incapacidad",
+    furipsPDF: "FURIPS",
+    medicalCertPDF: "Certificado médico tratante",
+    birthCertPDF: "Registro civil de nacimiento",
+    liveBirthCertPDF: "Certificado de nacido vivo",
+    motherIdPDF: "Cédula de la madre",
+  };
+  return labels[key] || key;
+}
 
 const columns: ColumnDef<Incapacidad>[] = [
   {
@@ -29,10 +51,12 @@ const columns: ColumnDef<Incapacidad>[] = [
   {
     accessorKey: "startDate",
     header: "Inicio",
+    cell: ({ row }) => formatDate(row.getValue("startDate"))
   },
   {
     accessorKey: "endDate",
     header: "Fin",
+    cell: ({ row }) => formatDate(row.getValue("endDate")),
   },
   {
     accessorKey: "status",
@@ -43,21 +67,30 @@ const columns: ColumnDef<Incapacidad>[] = [
     },
   },
   {
-    accessorKey: "pdfUrl",
-    header: "PDF",
+    accessorKey: "files",
+    header: "Documentos",
     cell: ({ row }) => {
-      const url = row.original.pdfUrl;
+      const files = row.original.files;
+      if (!files) return <span className="text-sm text-muted-foreground">Sin documentos</span>;
+
       return (
-        <HoverCard>
-          <HoverCardTrigger asChild>
-            <Button variant="link" className="text-primary hover:underline text-sm">
-              Ver PDF
-            </Button>
-          </HoverCardTrigger>
-          <HoverCardContent className="w-[400px] h-[300px] p-0">
-            <iframe src={url} width="100%" height="100%" />
-          </HoverCardContent>
-        </HoverCard>
+        <div className="flex flex-col gap-2">
+          {Object.entries(files).map(([key, url]) => (
+            <div key={key} className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground capitalize w-[10rem]">{getLabel(key)}</span>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <Button variant="link" className="text-sm text-primary hover:underline p-0 h-auto">
+                    Ver PDF
+                  </Button>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-[400px] h-[300px] p-0">
+                  <iframe src={url} width="100%" height="100%" />
+                </HoverCardContent>
+              </HoverCard>
+            </div>
+          ))}
+        </div>
       );
     },
   },
@@ -69,9 +102,7 @@ export default function Historial() {
   useEffect(() => {
     const fetchData = async () => {
       const user = auth.currentUser;
-      console.log("User:", user);
       if (!user) return;
-      console.log("Fetching data for user:", user.uid);
 
       const db = getFirestore();
       const q = query(collection(db, "incapacidades"), where("userId", "==", user.uid));
@@ -85,8 +116,8 @@ export default function Historial() {
           startDate: d.startDate,
           endDate: d.endDate,
           observations: d.observations,
-          pdfUrl: d.pdfUrl,
           status: d.status,
+          files: d.files,
         };
       });
 
@@ -110,7 +141,7 @@ export default function Historial() {
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="font-semibold text-md uppercase text-primary">
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}

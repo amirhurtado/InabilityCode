@@ -25,40 +25,43 @@ export default function NewDisability() {
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
+  
     const formData = new FormData();
     formData.append("type", data.type);
     formData.append("startDate", data.startDate);
     formData.append("endDate", data.endDate);
     formData.append("observations", data.observations || "");
-    if (data.disabilityPDF?.[0])
-      formData.append("disabilityPDF", data.disabilityPDF[0]);
+  
+    if (data.disabilityPDF?.[0]) formData.append("disabilityPDF", data.disabilityPDF[0]);
     if (data.furipsPDF?.[0]) formData.append("furipsPDF", data.furipsPDF[0]);
-    if (data.medicalCertPDF?.[0])
-      formData.append("medicalCertPDF", data.medicalCertPDF[0]);
-    if (data.birthCertPDF?.[0])
-      formData.append("birthCertPDF", data.birthCertPDF[0]);
-    if (data.liveBirthCertPDF?.[0])
-      formData.append("liveBirthCertPDF", data.liveBirthCertPDF[0]);
-    if (data.motherIdPDF?.[0])
-      formData.append("motherIdPDF", data.motherIdPDF[0]);
-
+    if (data.medicalCertPDF?.[0]) formData.append("medicalCertPDF", data.medicalCertPDF[0]);
+    if (data.birthCertPDF?.[0]) formData.append("birthCertPDF", data.birthCertPDF[0]);
+    if (data.liveBirthCertPDF?.[0]) formData.append("liveBirthCertPDF", data.liveBirthCertPDF[0]);
+    if (data.motherIdPDF?.[0]) formData.append("motherIdPDF", data.motherIdPDF[0]);
+  
     const result = await validateDisabilityServer(formData);
-
+  
     if (!result.success && result.errors) {
       alert("Errores encontrados:\n" + result.errors.join("\n"));
+      setIsLoading(false);
       return;
     }
-
+  
     await saveDisabilityToFirestore({
       type: data.type,
       startDate: data.startDate,
       endDate: data.endDate,
       observations: data.observations,
-      pdfUrl: result.pdfUrl!,
+      pdfUrl: result.disabilityPDF!,     
+      furipsUrl: result.furipsPDF,
+      medicalCertUrl: result.medicalCertPDF,
+      birthCertUrl: result.birthCertPDF,
+      liveBirthCertUrl: result.liveBirthCertPDF,
+      motherIdUrl: result.motherIdPDF,
     });
-
+  
     alert("Incapacidad enviada exitosamente.");
-    setIsLoading(false);  
+    setIsLoading(false);
   };
 
   return (

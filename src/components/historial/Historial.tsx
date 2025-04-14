@@ -8,7 +8,13 @@ import {
   useReactTable,
   flexRender,
 } from "@tanstack/react-table";
-import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import {
   Table,
   TableBody,
@@ -17,10 +23,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/Table";
-import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/HoverCard";
+import {
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardContent,
+} from "@/components/HoverCard";
 import { formatDate } from "@/lib/utils";
 import { Button } from "../Button";
-import  HistorialSkeleton  from "./HistorialSkeleton";
+import HistorialSkeleton from "./HistorialSkeleton";
+import { Table2 } from "lucide-react";
 
 interface Incapacidad {
   id: string;
@@ -52,7 +63,7 @@ const columns: ColumnDef<Incapacidad>[] = [
   {
     accessorKey: "startDate",
     header: "Inicio",
-    cell: ({ row }) => formatDate(row.getValue("startDate"))
+    cell: ({ row }) => formatDate(row.getValue("startDate")),
   },
   {
     accessorKey: "endDate",
@@ -64,7 +75,11 @@ const columns: ColumnDef<Incapacidad>[] = [
     header: "Estado",
     cell: ({ row }) => {
       const value = row.getValue("status") as string;
-      return <span className="text-slate-500">{value === "pending" ? "Pendiente" : value}</span>;
+      return (
+        <span className="text-slate-500">
+          {value === "pending" ? "Pendiente" : value}
+        </span>
+      );
     },
   },
   {
@@ -72,16 +87,24 @@ const columns: ColumnDef<Incapacidad>[] = [
     header: "Documentos",
     cell: ({ row }) => {
       const files = row.original.files;
-      if (!files) return <span className="text-sm text-muted-foreground">Sin documentos</span>;
+      if (!files)
+        return (
+          <span className="text-sm text-muted-foreground">Sin documentos</span>
+        );
 
       return (
         <div className="flex flex-col gap-2">
           {Object.entries(files).map(([key, url]) => (
             <div key={key} className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground capitalize w-[10rem]">{getLabel(key)}</span>
+              <span className="text-xs text-muted-foreground capitalize w-[10rem]">
+                {getLabel(key)}
+              </span>
               <HoverCard>
                 <HoverCardTrigger asChild>
-                  <Button variant="link" className="text-sm text-primary hover:underline p-0 h-auto">
+                  <Button
+                    variant="link"
+                    className="text-sm text-primary hover:underline p-0 h-auto"
+                  >
                     Ver PDF
                   </Button>
                 </HoverCardTrigger>
@@ -100,6 +123,7 @@ const columns: ColumnDef<Incapacidad>[] = [
 export default function Historial() {
   const [data, setData] = useState<Incapacidad[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const user = auth.currentUser;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -107,7 +131,10 @@ export default function Historial() {
       if (!user) return;
 
       const db = getFirestore();
-      const q = query(collection(db, "incapacidades"), where("userId", "==", user.uid));
+      const q = query(
+        collection(db, "incapacidades"),
+        where("userId", "==", user.uid)
+      );
       const querySnapshot = await getDocs(q);
 
       const docs = querySnapshot.docs.map((doc) => {
@@ -141,37 +168,63 @@ export default function Historial() {
       {isLoading ? (
         <HistorialSkeleton />
       ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="font-semibold text-md uppercase text-primary">
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+        <div className="flex flex-col gap-8">
+          <div>
+            <Table />
+            <h2 className="text-lg text-slate-500">
+            Historial de incapacidades de <span className="italic underline">{user?.email}</span> 
+          </h2>
+
+          </div>
+         
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead
+                        key={header.id}
+                        className="font-semibold text-md uppercase text-primary"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="text-center text-slate-500 py-10">
-                    No se encontraron registros.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="text-center text-slate-500 py-10"
+                    >
+                      No se encontraron registros.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
     </div>

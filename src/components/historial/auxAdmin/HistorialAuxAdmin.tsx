@@ -150,7 +150,7 @@ export default function HistorialGlobalAuxAdmin() {
         <HistorialSkeleton />
       ) : (
         <div className="flex flex-col gap-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-col items-start justify-between gap-4">
             <div className="flex items-center gap-2 text-slate-500">
               <Table2 size={24} />
               <h2 className="text-lg font-semibold text-primary">
@@ -159,6 +159,7 @@ export default function HistorialGlobalAuxAdmin() {
             </div>
 
             <HistorialFilters
+            isAdmin = {true}
               search={search}
               onSearchChange={setSearch}
               allStatuses={allStatuses}

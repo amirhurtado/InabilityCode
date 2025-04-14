@@ -58,7 +58,7 @@ export async function saveDisabilityToFirestore(data: DisabilityFormData): Promi
     files,
     userId: user.uid,
     createdAt: Timestamp.now(),
-    status: "pending",
+    status: "pendiente",
   });
 }
 

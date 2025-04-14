@@ -77,13 +77,22 @@ const columns: ColumnDef<Incapacidad>[] = [
     header: "Estado",
     cell: ({ row }) => {
       const value = row.getValue("status") as string;
+  
+      const textColor = {
+        pending: "text-slate-500",
+        transcrita: "text-blue-600",
+        rechazada: "text-red-600",
+        pagada: "text-green-600",
+      }[value] || "text-gray-500";
+  
       return (
-        <span className="text-slate-500">
-          {value === "pending" ? "Pendiente" : value}
+        <span className={`text-sm font-medium ${textColor}`}>
+          {value.charAt(0).toUpperCase() + value.slice(1)}
         </span>
       );
     },
   },
+  
   {
     accessorKey: "files",
     header: "Documentos",

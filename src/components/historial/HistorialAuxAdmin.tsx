@@ -22,78 +22,92 @@ import { ListFilter, Table2 } from "lucide-react";
 import { getLabelFromKey } from "@/lib/utils";
 import { getUserInfo } from "@/app/services/disability/client";
 
-const columns: ColumnDef<DisabilityProps>[] = [
-  {
-    accessorKey: "username",
-    header: "Colaborador",
-    cell: ({ row }) => (
-      <span className=" text-sm">
-        {row.original.email || "Sin info"}
-      </span>
-    ),
-  },
-  {
-    accessorKey: "type",
-    header: "Tipo",
-  },
-  {
-    accessorKey: "startDate",
-    header: "Inicio",
-    cell: ({ row }) => formatDate(row.getValue("startDate")),
-  },
-  {
-    accessorKey: "endDate",
-    header: "Fin",
-    cell: ({ row }) => formatDate(row.getValue("endDate")),
-  },
-  {
-    accessorKey: "status",
-    header: "Estado",
-    cell: ({ row }) => {
-      const value = row.getValue("status") as string;
-      return <span className="text-slate-500">{value === "pending" ? "Pendiente" : value}</span>;
-    },
-  },
-  {
-    accessorKey: "files",
-    header: "Documentos",
-    cell: ({ row }) => {
-      const files = row.original.files;
-      if (!files)
-        return <span className="text-sm text-muted-foreground">Sin documentos</span>;
-
-      return (
-        <div className="flex flex-col gap-2">
-          {Object.entries(files).map(([key, url]) => (
-            <div key={key} className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground capitalize w-[10rem]">
-                {getLabelFromKey(key)}
-              </span>
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <Button
-                    variant="link"
-                    className="text-sm text-primary hover:underline p-0 h-auto"
-                  >
-                    Ver PDF
-                  </Button>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-[400px] h-[300px] p-0">
-                  <iframe src={url} width="100%" height="100%" />
-                </HoverCardContent>
-              </HoverCard>
-            </div>
-          ))}
-        </div>
-      );
-    },
-  },
-];
+import { StatusSelectCell } from "./StatusSelectCell";
 
 export default function HistorialGlobalAuxAdmin() {
   const [data, setData] = useState<DisabilityProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+
+  const columns: ColumnDef<DisabilityProps>[] = [
+    {
+      accessorKey: "username",
+      header: "Colaborador",
+      cell: ({ row }) => (
+        <span className=" text-sm">
+          {row.original.email || "Sin info"}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "type",
+      header: "Tipo",
+    },
+    {
+      accessorKey: "startDate",
+      header: "Inicio",
+      cell: ({ row }) => formatDate(row.getValue("startDate")),
+    },
+    {
+      accessorKey: "endDate",
+      header: "Fin",
+      cell: ({ row }) => formatDate(row.getValue("endDate")),
+    },
+    {
+      accessorKey: "status",
+      header: "Estado",
+      cell: ({ row }) => (
+        <StatusSelectCell
+          id={row.original.id}
+          currentStatus={row.original.status}
+          onStatusChange={(newStatus) => {
+            const updated = [...data];
+            const idx = updated.findIndex((i) => i.id === row.original.id);
+            if (idx !== -1) {
+              updated[idx].status = newStatus;
+              setData(updated); 
+            }
+          }}
+        />
+      ),
+    },
+    
+    
+    {
+      accessorKey: "files",
+      header: "Documentos",
+      cell: ({ row }) => {
+        const files = row.original.files;
+        if (!files)
+          return <span className="text-sm text-muted-foreground">Sin documentos</span>;
+  
+        return (
+          <div className="flex flex-col gap-2">
+            {Object.entries(files).map(([key, url]) => (
+              <div key={key} className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground capitalize w-[10rem]">
+                  {getLabelFromKey(key)}
+                </span>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <Button
+                      variant="link"
+                      className="text-sm text-primary hover:underline p-0 h-auto"
+                    >
+                      Ver PDF
+                    </Button>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-[400px] h-[300px] p-0">
+                    <iframe src={url} width="100%" height="100%" />
+                  </HoverCardContent>
+                </HoverCard>
+              </div>
+            ))}
+          </div>
+        );
+      },
+    },
+  ];
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {

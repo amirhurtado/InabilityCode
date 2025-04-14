@@ -43,12 +43,20 @@ const columns: ColumnDef<Incapacidad>[] = [
   {
     accessorKey: "startDate",
     header: "Inicio",
-    cell: ({ row }) => formatDate(row.getValue("startDate")),
+    cell: ({ row }) => (
+      <span className="text-[.8rem] text-muted-foreground">
+        {formatDate(row.getValue("startDate"))}
+      </span>
+    ),
   },
   {
     accessorKey: "endDate",
     header: "Fin",
-    cell: ({ row }) => formatDate(row.getValue("endDate")),
+    cell: ({ row }) => (
+      <span className="text-[.8rem] text-muted-foreground">
+        {formatDate(row.getValue("endDate"))}
+      </span>
+    ),
   },
   {
     accessorKey: "status",

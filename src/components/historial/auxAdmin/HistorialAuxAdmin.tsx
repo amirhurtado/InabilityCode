@@ -21,6 +21,7 @@ import { getUserInfo } from "@/app/services/disability/client";
 import { StatusSelectCell } from "./StatusSelectCell";
 import IncapacityFilesCell from "../IncapacityFilesCell";
 import HistorialFilters from "../HistorialFilters";
+import ObservationInfoIcon from "./ObservationInfoIcon";
 
 export default function HistorialGlobalAuxAdmin() {
   const [data, setData] = useState<DisabilityProps[]>([]);
@@ -45,12 +46,20 @@ export default function HistorialGlobalAuxAdmin() {
     {
       accessorKey: "startDate",
       header: "Inicio",
-      cell: ({ row }) => formatDate(row.getValue("startDate")),
+      cell: ({ row }) => (
+        <span className="text-[.8rem] text-muted-foreground">
+          {formatDate(row.getValue("startDate"))}
+        </span>
+      ),
     },
     {
       accessorKey: "endDate",
       header: "Fin",
-      cell: ({ row }) => formatDate(row.getValue("endDate")),
+      cell: ({ row }) => (
+        <span className="text-[.8rem] text-muted-foreground">
+          {formatDate(row.getValue("endDate"))}
+        </span>
+      ),
     },
     {
       accessorKey: "status",
@@ -84,6 +93,16 @@ export default function HistorialGlobalAuxAdmin() {
           );
 
         return <IncapacityFilesCell files={files} />;
+      },
+    },
+    {
+      id: "observaciones",
+      header: () => <span className="sr-only">Obs</span>,
+      cell: ({ row }) => {
+        const obs = row.original.observations;
+        if (!obs) return null;
+  
+        return <ObservationInfoIcon observation={obs} />;
       },
     },
   ];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/Input";
 import { Textarea } from "@/components/Textarea";
@@ -12,60 +12,103 @@ import {
 } from "@/app/services/disability/client";
 import { LoaderCircle } from "lucide-react";
 
+interface FormData {
+  type: string;
+  startDate: string;
+  endDate: string;
+  observations: string;
+  disabilityPDF: FileList;
+  furipsPDF?: FileList;
+  medicalCertPDF?: FileList;
+  birthCertPDF?: FileList;
+  liveBirthCertPDF?: FileList;
+  motherIdPDF?: FileList;
+}
+
+const additionalFieldsMap: Record<string, { name: keyof FormData; label: string }[]> = {
+  "Accidente de tránsito": [
+    { name: "furipsPDF", label: "FURIPS (PDF)" },
+  ],
+  "Licencia de maternidad": [
+    { name: "medicalCertPDF", label: "Certificado médico tratante (PDF)" },
+  ],
+  "Licencia de paternidad": [
+    { name: "birthCertPDF", label: "Registro civil del hijo (PDF)" },
+    { name: "liveBirthCertPDF", label: "Certificado de nacido vivo (PDF)" },
+    { name: "motherIdPDF", label: "Cédula de la madre (PDF)" },
+  ],
+};
+
 export default function NewDisability() {
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
+    reset,
   } = useForm<FormData>();
+
+  const formRef = useRef<HTMLFormElement>(null); 
 
   const [isLoading, setIsLoading] = useState(false);
   const disabilityType = watch("type");
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
-  
+
     const formData = new FormData();
     formData.append("type", data.type);
     formData.append("startDate", data.startDate);
     formData.append("endDate", data.endDate);
     formData.append("observations", data.observations || "");
-  
-    if (data.disabilityPDF?.[0]) formData.append("disabilityPDF", data.disabilityPDF[0]);
-    if (data.furipsPDF?.[0]) formData.append("furipsPDF", data.furipsPDF[0]);
-    if (data.medicalCertPDF?.[0]) formData.append("medicalCertPDF", data.medicalCertPDF[0]);
-    if (data.birthCertPDF?.[0]) formData.append("birthCertPDF", data.birthCertPDF[0]);
-    if (data.liveBirthCertPDF?.[0]) formData.append("liveBirthCertPDF", data.liveBirthCertPDF[0]);
-    if (data.motherIdPDF?.[0]) formData.append("motherIdPDF", data.motherIdPDF[0]);
-  
+
+    const keys: (keyof FormData)[] = [
+      "disabilityPDF",
+      "furipsPDF",
+      "medicalCertPDF",
+      "birthCertPDF",
+      "liveBirthCertPDF",
+      "motherIdPDF",
+    ];
+
+    keys.forEach((key) => {
+      const fileList = data[key];
+      if (fileList && fileList.length > 0) {
+        formData.append(key, fileList[0]);
+      }
+    });
+
     const result = await validateDisabilityServer(formData);
-  
+
     if (!result.success && result.errors) {
       alert("Errores encontrados:\n" + result.errors.join("\n"));
       setIsLoading(false);
       return;
     }
-  
+
     await saveDisabilityToFirestore({
       type: data.type,
       startDate: data.startDate,
       endDate: data.endDate,
       observations: data.observations,
-      pdfUrl: result.disabilityPDF!,     
+      pdfUrl: result.disabilityPDF!,
       furipsUrl: result.furipsPDF,
       medicalCertUrl: result.medicalCertPDF,
       birthCertUrl: result.birthCertPDF,
       liveBirthCertUrl: result.liveBirthCertPDF,
       motherIdUrl: result.motherIdPDF,
     });
-  
+
     alert("Incapacidad enviada exitosamente.");
     setIsLoading(false);
+    reset(); 
+    if (formRef.current) {
+      formRef.current.reset(); 
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
+    <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
       {/* Tipo de incapacidad */}
       <div className="flex flex-col gap-3">
         <label className="text-sm text-slate-500">Tipo de incapacidad</label>
@@ -80,112 +123,43 @@ export default function NewDisability() {
           <option value="Licencia de maternidad">Licencia de maternidad</option>
           <option value="Licencia de paternidad">Licencia de paternidad</option>
         </select>
-        {errors.type && (
-          <p className="text-red-500 text-sm">Este campo es obligatorio.</p>
-        )}
+        {errors.type && <p className="text-red-500 text-sm">Este campo es obligatorio.</p>}
       </div>
 
       {/* Fechas */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-3">
-          <label className="text-sm text-slate-500">Fecha de inicio</label>
-          <Input type="date" {...register("startDate", { required: true })} />
-          {errors.startDate && (
-            <p className="text-red-500 text-sm">Campo obligatorio.</p>
-          )}
-        </div>
-        <div className="flex flex-col gap-3">
-          <label className="text-sm text-slate-500">Fecha de fin</label>
-          <Input type="date" {...register("endDate", { required: true })} />
-          {errors.endDate && (
-            <p className="text-red-500 text-sm">Campo obligatorio.</p>
-          )}
-        </div>
+        {(["startDate", "endDate"] as (keyof FormData)[]).map((key) => (
+          <div className="flex flex-col gap-3" key={key}>
+            <label className="text-sm text-slate-500">
+              {key === "startDate" ? "Fecha de inicio" : "Fecha de fin"}
+            </label>
+            <Input type="date" {...register(key, { required: true })} />
+            {errors[key] && <p className="text-red-500 text-sm">Campo obligatorio.</p>}
+          </div>
+        ))}
       </div>
 
       {/* Observaciones */}
       <div className="flex flex-col gap-3">
         <label className="text-sm text-slate-500">Observaciones</label>
-        <Textarea
-          {...register("observations")}
-          placeholder="Detalles adicionales (opcional)"
-        />
+        <Textarea {...register("observations")} placeholder="Detalles adicionales (opcional)" />
       </div>
 
       {/* PDF principal */}
       <div className="flex flex-col gap-3">
-        <label className="text-sm text-slate-500">
-          Certificado de incapacidad (PDF)
-        </label>
-        <Input
-          type="file"
-          accept="application/pdf"
-          {...register("disabilityPDF", { required: true })}
-        />
-        {errors.disabilityPDF && (
-          <p className="text-red-500 text-sm">Este PDF es requerido.</p>
-        )}
+        <label className="text-sm text-slate-500">Certificado de incapacidad (PDF)</label>
+        <Input type="file" accept="application/pdf" {...register("disabilityPDF", { required: true })} />
+        {errors.disabilityPDF && <p className="text-red-500 text-sm">Este PDF es requerido.</p>}
       </div>
 
-      {/* Archivos adicionales por tipo */}
-      {disabilityType === "Accidente de tránsito" && (
-        <div className="flex flex-col gap-3">
-          <label className="text-sm text-slate-500">FURIPS (PDF)</label>
-          <Input
-            type="file"
-            accept="application/pdf"
-            {...register("furipsPDF", { required: true })}
-          />
+      {/* Archivos adicionales dinámicos */}
+      {additionalFieldsMap[disabilityType]?.map(({ name, label }) => (
+        <div className="flex flex-col gap-3" key={name}>
+          <label className="text-sm text-slate-500">{label}</label>
+          <Input type="file" accept="application/pdf" {...register(name, { required: true })} />
+          {errors[name] && <p className="text-red-500 text-sm">Este PDF es requerido.</p>}
         </div>
-      )}
-
-      {disabilityType === "Licencia de maternidad" && (
-        <div className="flex flex-col gap-3">
-          <label className="text-sm text-slate-500">
-            Certificado médico tratante (PDF)
-          </label>
-          <Input
-            type="file"
-            accept="application/pdf"
-            {...register("medicalCertPDF", { required: true })}
-          />
-        </div>
-      )}
-
-      {disabilityType === "Licencia de paternidad" && (
-        <>
-          <div className="flex flex-col gap-3">
-            <label className="text-sm text-slate-500">
-              Registro civil del hijo (PDF)
-            </label>
-            <Input
-              type="file"
-              accept="application/pdf"
-              {...register("birthCertPDF", { required: true })}
-            />
-          </div>
-          <div className="flex flex-col gap-3">
-            <label className="text-sm text-slate-500">
-              Certificado de nacido vivo (PDF)
-            </label>
-            <Input
-              type="file"
-              accept="application/pdf"
-              {...register("liveBirthCertPDF", { required: true })}
-            />
-          </div>
-          <div className="flex flex-col gap-3">
-            <label className="text-sm text-slate-500">
-              Cédula de la madre (PDF)
-            </label>
-            <Input
-              type="file"
-              accept="application/pdf"
-              {...register("motherIdPDF", { required: true })}
-            />
-          </div>
-        </>
-      )}
+      ))}
 
       {/* Botones */}
       <div className="flex gap-4 mt-8">
@@ -198,7 +172,7 @@ export default function NewDisability() {
         </Button>
         {!isLoading && (
           <Button type="button" className="w-[12rem]" variant="destructive">
-            <Link href={"/dashboard"}>Cancelar</Link>
+            <Link href="/dashboard">Cancelar</Link>
           </Button>
         )}
       </div>

@@ -5,7 +5,8 @@ export const getFirebaseErrorMessage = (error: unknown): string => {
 
   const message = (error as { message: string }).message;
 
-  if (!message.includes("Firebase:")) {
+
+  if (!message.includes("Firebase:") && !message.includes("Clave")) {
     return ""; 
   }
 

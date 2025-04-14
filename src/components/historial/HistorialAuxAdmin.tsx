@@ -17,7 +17,7 @@ import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/Hove
 import { formatDate } from "@/lib/utils";
 import { Button } from "../Button";
 import HistorialSkeleton from "./HistorialSkeleton";
-import { Table2 } from "lucide-react";
+import { ListFilter, Table2 } from "lucide-react";
 
 import { getLabelFromKey } from "@/lib/utils";
 import { getUserInfo } from "@/app/services/disability/client";
@@ -162,7 +162,11 @@ export default function HistorialGlobalAuxAdmin() {
                 Historial global de incapacidades
               </h2>
             </div>
-            <div className="flex flex-wrap gap-2 items-center">
+            <div className="flex flex-wrap gap-2 items-center ">
+              <div className="flex items-center gap-2 mr-4">
+              <ListFilter />
+              <p>Filtrar por estado:</p>
+              </div>
               {allStatuses.map((status) => (
                 <Button
                   key={status}

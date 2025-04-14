@@ -23,6 +23,7 @@ import IncapacityFilesCell from "../IncapacityFilesCell";
 import DisabilityStatusCell from "./DisabilityStatusCell";
 import HistorialTableUser from "../HistorialTable";
 import HistorialFilters from "../HistorialFilters";
+import ObservationInfoIcon from "../auxAdmin/ObservationInfoIcon";
 
 interface Incapacidad {
   id: string;
@@ -81,6 +82,16 @@ const columns: ColumnDef<Incapacidad>[] = [
       return <IncapacityFilesCell files={files} />;
     },
   },
+  {
+        id: "observaciones",
+        header: () => <span className="sr-only">Obs</span>,
+        cell: ({ row }) => {
+          const obs = row.original.observations;
+          if (!obs) return null;
+    
+          return <ObservationInfoIcon observation={obs} />;
+        },
+      },
 ];
 
 export default function Historial() {

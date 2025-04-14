@@ -1,9 +1,11 @@
 import { auth, db } from "../../../../lib/firebase";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+
 
 export interface DisabilityValidationResult {
   success: boolean;
-  pdfUrl: string; // puedes eliminar esto si decides usar solo disabilityPDF
+  pdfUrl: string; 
   disabilityPDF?: string;
   furipsPDF?: string;
   medicalCertPDF?: string;
@@ -59,3 +61,21 @@ export async function saveDisabilityToFirestore(data: DisabilityFormData): Promi
     status: "pending",
   });
 }
+
+
+
+export const getUserInfo = async (userId: string): Promise<{ username?: string; email?: string } | null> => {
+  try {
+    const db = getFirestore();
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (!userDoc.exists()) return null;
+    const data = userDoc.data();
+    return {
+      username: data.username,
+      email: data.email,
+    };
+  } catch (err) {
+    console.error("Error trayendo datos del usuario:", err);
+    return null;
+  }
+};

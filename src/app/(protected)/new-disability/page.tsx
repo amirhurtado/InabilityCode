@@ -7,20 +7,6 @@ import { Button } from "@/components/Button";
 import Link from "next/link";
 import { validateDisabilityServer, saveDisabilityToFirestore } from "@/app/services/disability/client";
 
-
-interface FormData {
-  type: string;
-  startDate: string;
-  endDate: string;
-  observations: string;
-  disabilityPDF: FileList;
-  furipsPDF?: FileList;
-  medicalCertPDF?: FileList;
-  birthCertPDF?: FileList;
-  liveBirthCertPDF?: FileList;
-  motherIdPDF?: FileList;
-}
-
 export default function NewDisability() {
   const {
     register,

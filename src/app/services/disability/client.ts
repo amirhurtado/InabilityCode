@@ -10,7 +10,6 @@ export async function validateDisabilityServer(data: FormData): Promise<{ succes
   return res.json();
 }
 
-
 export interface DisabilityFormData {
   type: string;
   startDate: string;
@@ -32,5 +31,6 @@ export async function saveDisabilityToFirestore(data: DisabilityFormData): Promi
     pdfUrl: data.pdfUrl,
     userId: user.uid,
     createdAt: Timestamp.now(),
+    status: "pending",
   });
 }

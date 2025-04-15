@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { auth } from "../../../lib/firebase";
+import { auth } from "../../../../lib/firebase";
 
 import { formatDate } from "@/lib/utils";
 import { getUserInfo } from "@/app/services/disability/client";
@@ -17,30 +17,44 @@ import { Table2 } from "lucide-react";
 import AssignReplacementButton from "./AssignReplacementButton";
 import DisabilityLiderTable from "./DisabilyLiderTable";
 import AssignedInfoIcon from "./AssignedInfoIcon";
+import HistorialFilters from "../HistorialFilters";
 
 export default function PanelLider() {
-  const [data, setData] = useState<[]>([]);
+  const [data, setData] = useState<DisabilityProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [replacedDisabilityIds, setReplacedDisabilityIds] = useState<string[]>(
     []
   );
   const [replacements, setReplacements] = useState<Record<string, string>>({});
 
-const fetchReplacements = async () => {
-  const db = getFirestore();
-  const snapshot = await getDocs(collection(db, "reemplazos"));
+  const [search, setSearch] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-  const map: Record<string, string> = {};
-  snapshot.forEach((doc) => {
-    const data = doc.data();
-    map[data.disabilityId] = data.replacementEmail; 
-  });
+  const fetchReplacements = async () => {
+    const db = getFirestore();
+    const snapshot = await getDocs(collection(db, "reemplazos"));
 
-  setReplacements(map);
-};
+    const map: Record<string, string> = {};
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      map[data.disabilityId] = data.replacementEmail;
+    });
 
-  const handleReplacementAssigned = (id: string) => {
-    setReplacedDisabilityIds((prev) => [...prev, id]);
+    setReplacements(map);
+    const ids = Object.keys(map);
+    setReplacedDisabilityIds(ids);
+  };
+
+  const handleAssignedReplacement = (
+    disabilityId: string,
+    replacementEmail: string
+  ) => {
+    setReplacements((prev) => ({
+      ...prev,
+      [disabilityId]: replacementEmail,
+    }));
+    setReplacedDisabilityIds((prev) => [...prev, disabilityId]);
   };
 
   const columns: ColumnDef<DisabilityProps>[] = [
@@ -81,25 +95,21 @@ const fetchReplacements = async () => {
             endDate={row.original.endDate}
             disabilityId={id}
             disabled={disabled}
-            onAssigned={handleReplacementAssigned}
+            onAssigned={handleAssignedReplacement}
           />
         );
       },
     },
-
     {
       id: "reemplazoInfo",
       header: () => null,
       cell: ({ row }) => {
         const disabilityId = row.original.id;
         const replacementEmail = replacements[disabilityId];
-    
         if (!replacementEmail) return null;
-    
         return <AssignedInfoIcon email={replacementEmail} />;
       },
-    }
-    
+    },
   ];
 
   useEffect(() => {
@@ -117,7 +127,6 @@ const fetchReplacements = async () => {
 
   const fetchData = async () => {
     const db = getFirestore();
-
     const snapshot = await getDocs(collection(db, "incapacidades"));
     const solicitudes = await Promise.all(
       snapshot.docs.map(async (docSnap) => {
@@ -135,24 +144,29 @@ const fetchReplacements = async () => {
         };
       })
     );
-
     const transcritas = solicitudes.filter(
       (item) => item.status === "transcrita" || item.status === "pagada"
     );
     setData(transcritas);
-
-    // Obtener ids de discapacidades ya reemplazadas
-    const reemplazosSnap = await getDocs(collection(db, "reemplazos"));
-    const ids = reemplazosSnap.docs.map((doc) => doc.data().disabilityId);
-    setReplacedDisabilityIds(ids);
-
     setIsLoading(false);
   };
 
+  const filteredData = data.filter((item) => {
+    const matchSearch = item.email
+      ?.toLowerCase()
+      .includes(search.toLowerCase());
+    const itemStartDate = new Date(item.startDate);
+    const matchStart =
+      !startDate || itemStartDate >= new Date(startDate + "T00:00");
+    const matchEnd = !endDate || itemStartDate <= new Date(endDate + "T23:59");
+    return matchSearch && matchStart && matchEnd;
+  });
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    autoResetPageIndex: false,
   });
 
   return (
@@ -161,14 +175,30 @@ const fetchReplacements = async () => {
         <HistorialSkeleton />
       ) : (
         <>
-          <div className="flex items-center gap-2 text-slate-500 mb-4">
-            <Table2 size={24} />
-            <h2 className="text-lg font-semibold text-primary">
-              Asignación de reemplazos
-            </h2>
+          <div className="flex flex-col gap-5 mb-10">
+            <div className="flex items-center gap-2 text-slate-500">
+              <Table2 size={24} />
+              <h2 className="text-lg font-semibold text-primary">
+                Asignación de reemplazos
+              </h2>
+            </div>
+
+            <HistorialFilters
+              isLider={true}
+              isAdmin={true}
+              search={search}
+              onSearchChange={setSearch}
+              allStatuses={[]}
+              selectedStatuses={[]}
+              onToggleStatus={() => {}}
+              startDate={startDate}
+              endDate={endDate}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+            />
           </div>
 
-          <div className="rounded-md border">
+          <div className="rounded-md border ">
             <DisabilityLiderTable
               table={table}
               columns={columns}

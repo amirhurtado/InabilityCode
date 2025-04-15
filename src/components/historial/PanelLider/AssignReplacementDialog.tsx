@@ -21,14 +21,15 @@ import {
 } from "firebase/firestore";
 
 type Props = {
-  open: boolean;
-  onClose: () => void;
-  userEmail: string;
-  startDate: string;
-  endDate: string;
-  disabilityId: string;
-  onAssigned: (disabilityId: string) => void;
-};
+    open: boolean;
+    onClose: () => void;
+    userEmail: string;
+    startDate: string;
+    endDate: string;
+    disabilityId: string;
+    onAssigned: (disabilityId: string, replacementEmail: string) => void; 
+  };
+  
 
 interface User {
   id: string;
@@ -88,7 +89,7 @@ export default function AssignReplacementDialog({
         timestamp: new Date().toISOString(),
         disabilityId,
       });
-      onAssigned(disabilityId);
+      onAssigned(disabilityId, replacementEmail);
       console.log("Reemplazo guardado");
       onClose();
     } catch (err) {

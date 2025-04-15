@@ -5,12 +5,12 @@ import { Button } from "@/components/Button";
 import AssignReplacementDialog from "./AssignReplacementDialog";
 
 type Props = {
-  userEmail: string; // 👈 antes era userId
+  userEmail: string; // Email del que está siendo reemplazado
   startDate: string;
   endDate: string;
   disabilityId: string;
   disabled: boolean;
-  onAssigned: (disabilityId: string) => void;
+  onAssigned: (disabilityId: string, replacementEmail: string) => void; // ✅ actualizado
 };
 
 export default function AssignReplacementButton({
@@ -37,11 +37,11 @@ export default function AssignReplacementButton({
         <AssignReplacementDialog
           open={open}
           onClose={() => setOpen(false)}
-          userEmail={userEmail} // 👈 actualizado
+          userEmail={userEmail}
           startDate={startDate}
           endDate={endDate}
           disabilityId={disabilityId}
-          onAssigned={onAssigned}
+          onAssigned={onAssigned} // ✅ ahora recibirá también el replacementEmail
         />
       )}
     </>

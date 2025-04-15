@@ -1,4 +1,4 @@
-import PanelLider from '@/components/PanelLider/PanelLider'
+import PanelLider from '@/components/historial/PanelLider/PanelLider'
 import React from 'react'
 
 const page = () => {

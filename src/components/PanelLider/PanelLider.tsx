@@ -16,6 +16,7 @@ import HistorialSkeleton from "@/components/historial/HistorialSkeleton";
 import { Table2 } from "lucide-react";
 import AssignReplacementButton from "./AssignReplacementButton";
 import DisabilityLiderTable from "./DisabilyLiderTable";
+import AssignedInfoIcon from "./AssignedInfoIcon";
 
 export default function PanelLider() {
   const [data, setData] = useState<[]>([]);
@@ -23,6 +24,20 @@ export default function PanelLider() {
   const [replacedDisabilityIds, setReplacedDisabilityIds] = useState<string[]>(
     []
   );
+  const [replacements, setReplacements] = useState<Record<string, string>>({});
+
+const fetchReplacements = async () => {
+  const db = getFirestore();
+  const snapshot = await getDocs(collection(db, "reemplazos"));
+
+  const map: Record<string, string> = {};
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    map[data.disabilityId] = data.replacementEmail; 
+  });
+
+  setReplacements(map);
+};
 
   const handleReplacementAssigned = (id: string) => {
     setReplacedDisabilityIds((prev) => [...prev, id]);
@@ -71,6 +86,19 @@ export default function PanelLider() {
         );
       },
     },
+
+    {
+      id: "reemplazoInfo",
+      header: () => null,
+      cell: ({ row }) => {
+        const disabilityId = row.original.id;
+        const replacementEmail = replacements[disabilityId];
+    
+        if (!replacementEmail) return null;
+    
+        return <AssignedInfoIcon email={replacementEmail} />;
+      },
+    }
     
   ];
 
@@ -78,6 +106,7 @@ export default function PanelLider() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         fetchData();
+        fetchReplacements();
       } else {
         setIsLoading(false);
       }

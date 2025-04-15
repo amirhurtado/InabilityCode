@@ -77,12 +77,12 @@ export default function AssignReplacementDialog({
     if (open) fetchUsersWithoutDisability();
   }, [open]);
 
-  const handleAssign = async (reemplazoEmail: string) => {
+  const handleAssign = async (replacementEmail: string) => {
     const db = getFirestore();
     try {
       await addDoc(collection(db, "reemplazos"), {
-        reemplazadoEmail: userEmail,
-        reemplazoEmail,
+        ReplacedEmail: userEmail,
+        replacementEmail,
         startDate,
         endDate,
         timestamp: new Date().toISOString(),

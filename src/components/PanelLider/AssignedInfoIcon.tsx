@@ -11,7 +11,7 @@ export default function AssignedInfoIcon({ email }: Props) {
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
-        <span className="cursor-pointer text-blue-600">
+        <span className="cursor-pointer text-primary">
           <Info size={18} />
         </span>
       </HoverCardTrigger>

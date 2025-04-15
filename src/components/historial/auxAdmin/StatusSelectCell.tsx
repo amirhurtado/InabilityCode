@@ -12,7 +12,7 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
-} from "@/components/ui/alert-dialog";
+} from "@/components/AlertDialog";
 import { Textarea } from "@/components/Textarea";
 
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "@/components/Input";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/Button";
 import { ListFilter } from "lucide-react";
 
 type Props = {

@@ -8,8 +8,8 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from "@/components/AlertDialog";
+import { Button } from "@/components/Button";
 import { useEffect, useState } from "react";
 import {
   getFirestore,

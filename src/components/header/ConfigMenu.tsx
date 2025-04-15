@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogFooter,
   AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
+} from "@/components/AlertDialog";
 import { changePasswordClient } from "@/app/services/auth/client";
 
 
@@ -58,7 +58,7 @@ const ConfigMenu = () => {
   
     try {
       await changePasswordClient(data.newPassword);
-      console.log("Contraseña cambiada exitosamente");
+      alert("Contraseña cambiada con éxito");
       setOpen(false);
     } catch (err) {
       console.error(err);

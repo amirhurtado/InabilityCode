@@ -19,6 +19,7 @@ const Header = ({ user }: DocumentData) => {
         <Logo />
       </Link>
       <div className="flex items-center gap-5">
+          <h2 className="italic text-slate-400">{user?.email}</h2>     
         <ModeToggle />
         {user && (
           <div className="flex items-center gap-2">

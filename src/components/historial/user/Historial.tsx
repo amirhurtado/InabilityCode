@@ -101,7 +101,6 @@ export default function Historial() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const user = auth.currentUser;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -163,8 +162,7 @@ export default function Historial() {
           <div className="flex gap-2 text-slate-500">
             <Table2 size={24} />
             <h2 className="text-lg">
-              Historial de incapacidades de{" "}
-              <span className="italic underline">{user?.email}</span>
+              Historial de incapacidades
             </h2>
           </div>
 

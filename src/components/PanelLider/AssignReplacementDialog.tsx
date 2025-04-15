@@ -21,15 +21,14 @@ import {
 } from "firebase/firestore";
 
 type Props = {
-    open: boolean;
-    onClose: () => void;
-    userId: string;
-    startDate: string;
-    endDate: string;
-    disabilityId: string;
-    onAssigned: (disabilityId: string) => void;
-  };
-  
+  open: boolean;
+  onClose: () => void;
+  userEmail: string;
+  startDate: string;
+  endDate: string;
+  disabilityId: string;
+  onAssigned: (disabilityId: string) => void;
+};
 
 interface User {
   id: string;
@@ -38,7 +37,15 @@ interface User {
   role: string;
 }
 
-export default function AssignReplacementDialog({ open, onClose, userId, startDate, endDate, disabilityId, onAssigned }: Props) {
+export default function AssignReplacementDialog({
+  open,
+  onClose,
+  userEmail,
+  startDate,
+  endDate,
+  disabilityId,
+  onAssigned,
+}: Props) {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -70,16 +77,16 @@ export default function AssignReplacementDialog({ open, onClose, userId, startDa
     if (open) fetchUsersWithoutDisability();
   }, [open]);
 
-  const handleAssign = async (reemplazoId: string) => {
+  const handleAssign = async (reemplazoEmail: string) => {
     const db = getFirestore();
     try {
       await addDoc(collection(db, "reemplazos"), {
-        reemplazadoId: userId,
-        reemplazoId,
+        reemplazadoEmail: userEmail,
+        reemplazoEmail,
         startDate,
         endDate,
         timestamp: new Date().toISOString(),
-        disabilityId, 
+        disabilityId,
       });
       onAssigned(disabilityId);
       console.log("Reemplazo guardado");
@@ -108,7 +115,7 @@ export default function AssignReplacementDialog({ open, onClose, userId, startDa
                 key={user.id}
                 variant="outline"
                 className="w-full justify-start"
-                onClick={() => handleAssign(user.id)}
+                onClick={() => handleAssign(user.email)}
               >
                 {user.email}
               </Button>

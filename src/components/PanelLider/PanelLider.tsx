@@ -61,7 +61,7 @@ export default function PanelLider() {
 
         return (
           <AssignReplacementButton
-            userId={row.original.userId}
+            userEmail={row.original.email!}
             startDate={row.original.startDate}
             endDate={row.original.endDate}
             disabilityId={id}
@@ -71,6 +71,7 @@ export default function PanelLider() {
         );
       },
     },
+    
   ];
 
   useEffect(() => {

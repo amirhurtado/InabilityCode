@@ -52,3 +52,20 @@ export const logout = async () => {
   cookieStore.delete("auth-token");
   redirect("/");
 };
+
+
+export const changePassword = async (newPassword: string) => {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth-token")?.value;
+  if (!token) throw new Error("No hay token");
+
+  const decoded = await adminAuth.verifyIdToken(token);
+  const uid = decoded.uid;
+
+  if (!uid) throw new Error("No se pudo obtener el UID");
+
+  await adminAuth.updateUser(uid, { password: newPassword });
+
+  console.log("[changePassword] Contraseña actualizada exitosamente");
+  return { success: true };
+};

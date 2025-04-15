@@ -68,3 +68,16 @@ export const onSubmitLogIn = async (data: logsProps) => {
     }
   };
   
+
+export const changePasswordClient = async (newPassword: string) => {
+    const res = await fetch("/api/change-password", {
+      method: "POST",
+      body: JSON.stringify({ newPassword }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  
+    if (!res.ok) throw new Error("No se pudo cambiar la contraseña");
+    return await res.json();
+};

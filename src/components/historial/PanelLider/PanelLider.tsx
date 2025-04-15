@@ -71,14 +71,18 @@ export default function PanelLider() {
       accessorKey: "startDate",
       header: "Inicio",
       cell: ({ row }) => (
-        <span className="text-sm">{formatDate(row.original.startDate)}</span>
+        <span className="text-[.8rem] text-muted-foreground">
+          {formatDate(row.getValue("startDate"))}
+        </span>
       ),
     },
     {
       accessorKey: "endDate",
       header: "Fin",
       cell: ({ row }) => (
-        <span className="text-sm">{formatDate(row.original.endDate)}</span>
+        <span className="text-[.8rem] text-muted-foreground">
+          {formatDate(row.getValue("endDate"))}
+        </span>
       ),
     },
     {

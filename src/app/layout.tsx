@@ -3,7 +3,7 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import { getUser } from "./services/auth/actions";
 
 import "./globals.css";
-import Header from "@/components/Header";
+import Header from "@/components/header/Header";
 
 export const metadata: Metadata = {
   title: "Inability Code",

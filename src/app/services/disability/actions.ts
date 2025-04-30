@@ -24,12 +24,11 @@ export async function updateStatusAndNotify(
   await updateDisabilityStatus(id, newStatus, motivo);
   console.log(newStatus, motivo, toEmail);
   if (newStatus === "rechazada" && motivo && toEmail) {
-    console.log("AQUI ENTRO")
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     resend.emails.send({
       from: 'onboarding@resend.dev',
-      to: 'a.hurtado@utp.edu.co',
+      to: toEmail,
       subject: 'Motivo de rechazo de tu incapacidad',
       html: `<p>Hola,</p><p>Tu solicitud fue rechazada por la siguiente razón:</p><blockquote>${motivo}</blockquote>`
 

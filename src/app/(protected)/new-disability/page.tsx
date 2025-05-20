@@ -6,6 +6,8 @@ import { Input } from "@/components/Input";
 import { Textarea } from "@/components/Textarea";
 import { Button } from "@/components/Button";
 import Link from "next/link";
+import { Typewriter } from "react-simple-typewriter";
+
 import {
   validateDisabilityServer,
   saveDisabilityToFirestore,
@@ -117,6 +119,19 @@ export default function NewDisability() {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-8"
     >
+      <h1>
+                <span className="text-[.9rem]">
+                  <Typewriter
+                    words={["Diligencia una nueva incapacidad"]}
+                    loop={1}
+                    cursor
+                    cursorStyle="_"
+                    typeSpeed={70}
+                    deleteSpeed={50}
+                    delaySpeed={1000}
+                  />
+                </span>
+              </h1>
       {/* Tipo de incapacidad */}
       <div className="flex flex-col gap-3">
         <label className="text-sm text-slate-500">Tipo de incapacidad</label>

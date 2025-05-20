@@ -10,7 +10,7 @@ const Home = () => {
     <div className="flex flex-col gap-12">
       <div className="flex justify-between items-center">
         <h1>
-          <span className="text-[1.4rem]">
+          <span className="text-[.9rem]">
             <Typewriter
               words={["Bienvenido de nuevo"]}
               loop={1}

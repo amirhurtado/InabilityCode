@@ -1,11 +1,29 @@
-import HistorialGlobalAuxAdmin from "@/components/historial/auxAdmin/HistorialAuxAdmin"
+"use client";
+import { Typewriter } from "react-simple-typewriter";
+import HistorialGlobalAuxAdmin from "@/components/historial/auxAdmin/HistorialAuxAdmin";
 
-const page = () => {
+const Home = () => {
   return (
-    <div>
+    <div className="flex flex-col gap-12">
+      <div className="flex justify-between items-center">
+        <h1>
+          <span className="text-[.9rem]">
+            <Typewriter
+              words={["Bienvenido de nuevo Auxiliar Administrativo"]}
+              loop={1}
+              cursor
+              cursorStyle="_"
+              typeSpeed={70}
+              deleteSpeed={50}
+              delaySpeed={1000}
+            />
+          </span>
+        </h1>
+      </div>
+
       <HistorialGlobalAuxAdmin />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default Home;

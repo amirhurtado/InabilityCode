@@ -38,7 +38,7 @@ export default function HistorialFilters({
         {(isAdmin || isLider) && (
           <Input
             placeholder="Buscar por correo"
-            className="w-64"
+            className="w-64  mt-[1.6rem]"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
           />

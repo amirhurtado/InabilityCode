@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { updateStatusAndNotify } from "@/app/services/disability/actions";
 import { updateDisabilityStatus } from "@/app/services/disability/actions";
 import {
   AlertDialog,
@@ -66,7 +65,7 @@ export const StatusSelectCell = ({ id, email, currentStatus, onStatusChange }: P
   const processStatusChange = async (newStatus: string, motivo?: string) => {
     setLoading(true);
   
-    if (newStatus === "rechazada" && motivo && email) {
+    if (newStatus === "rechazada" || newStatus === "transcrita" && email) {
       await fetch("/api/disability/update-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

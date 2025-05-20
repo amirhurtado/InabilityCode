@@ -3,13 +3,18 @@ import Link from "next/link";
 
 import LogForm from "@/components/LogForm";
 import ImageForm from "@/components/ImageForm";
+import { Key } from "lucide-react";
 
 const Register = () => {
 
   return (
-    <div className="flex w-full h-full justify-center gap-15 ">
+    <div className="flex w-full h-full items-center justify-center gap-15 ">
       <div className="w-1/3 flex flex-col justify-center gap-15 p-3 ">
-        <h1 className="text-3xl">Registrate</h1>
+       <div className="flex items-center gap-3">
+        <Key size={24} strokeWidth={1.8} />
+         <h1 className="text-3xl">Regístrate.</h1>
+       </div>
+       
 
         <LogForm type="register"  />
 

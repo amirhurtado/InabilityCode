@@ -83,15 +83,15 @@ const columns: ColumnDef<Incapacidad>[] = [
     },
   },
   {
-        id: "observaciones",
-        header: () => <span className="sr-only">Obs</span>,
-        cell: ({ row }) => {
-          const obs = row.original.observations;
-          if (!obs) return null;
-    
-          return <ObservationInfoIcon observation={obs} />;
-        },
-      },
+    id: "observaciones",
+    header: () => <span className="sr-only">Obs</span>,
+    cell: ({ row }) => {
+      const obs = row.original.observations;
+      if (!obs) return null;
+
+      return <ObservationInfoIcon observation={obs} />;
+    },
+  },
 ];
 
 export default function Historial() {
@@ -100,7 +100,7 @@ export default function Historial() {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-
+  const [hasActiveReplacement, setHasActiveReplacement] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -128,6 +128,20 @@ export default function Historial() {
 
         setData(docs);
         setIsLoading(false);
+        const replacementQuery = query(
+          collection(db, "reemplazos"),
+          where("replacementEmail", "==", user.email)
+        );
+        const replacementSnapshot = await getDocs(replacementQuery);
+
+        const today = new Date().toISOString().split("T")[0]; // formato YYYY-MM-DD
+
+        const hasValidReplacement = replacementSnapshot.docs.some((doc) => {
+          const data = doc.data();
+          return data.startDate <= today && data.endDate >= today;
+        });
+
+        setHasActiveReplacement(hasValidReplacement);
       }
     });
 
@@ -148,7 +162,6 @@ export default function Historial() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     autoResetPageIndex: false,
-
   });
 
   const allStatuses = Array.from(new Set(data.map((d) => d.status)));
@@ -161,9 +174,7 @@ export default function Historial() {
         <div className="flex flex-col gap-8">
           <div className="flex gap-2 text-slate-500">
             <Table2 size={24} />
-            <h2 className="text-lg">
-              Historial de incapacidades
-            </h2>
+            <h2 className="text-lg">Historial de incapacidades</h2>
           </div>
 
           <HistorialFilters
@@ -184,6 +195,13 @@ export default function Historial() {
               )
             }
           />
+
+          {hasActiveReplacement && (
+            <div className="border border-yellow-400 bg-yellow-100 text-yellow-800 rounded p-4 text-sm">
+              ⚠️ <strong>Tienes un reemplazo activo.</strong> Acercate a un
+              superior
+            </div>
+          )}
 
           <div className="rounded-md border">
             <HistorialTableUser table={table} columns={columns} />

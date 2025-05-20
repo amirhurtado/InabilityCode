@@ -24,7 +24,7 @@ const ProtectedLayout = async ({ children }: { children: React.ReactNode }) => {
         <HoverCard>
           <HoverCardTrigger asChild>
             <div className="cursor-pointer">
-              <CircleHelp size={38} />
+              <CircleHelp size={38} strokeWidth={1} />
             </div>
           </HoverCardTrigger>
           <HoverCardContent className="text-xs w-fit px-3 py-2 " side="top">

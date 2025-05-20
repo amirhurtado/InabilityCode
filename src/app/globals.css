@@ -53,7 +53,7 @@ body {
 
 @layer utilities{
   .container{
-    @apply py-6 px-24 min-w-full flex flex-col h-full;
+    @apply py-6 px-24 min-w-full flex flex-col h-screen;
   }
 }
 

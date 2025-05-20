@@ -15,7 +15,7 @@ const LogIn = () => {
       <div className="w-1/3 flex flex-col justify-center gap-15 p-3  ">
         <div className="flex items-center gap-3">
         <ScanFace size={24} strokeWidth={1.8} />
-        <h1 className="text-3xl">Inicia Sesion.</h1>
+        <h1 className="text-3xl">Inicia Sesión.</h1>
 
        </div>
 

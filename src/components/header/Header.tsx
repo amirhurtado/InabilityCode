@@ -10,7 +10,6 @@ import ConfigMenu from "./ConfigMenu";
 
 
 const Header = ({ user }: DocumentData) => {
-  console.log(user);
   return (
     <div className="flex justify-between items-center">
       <Link
@@ -20,7 +19,12 @@ const Header = ({ user }: DocumentData) => {
         <Logo />
       </Link>
       <div className="flex items-center gap-10">
+        <div className="flex gap-4 items-center">
+        <h2 className="italic text-slate-400">{user?.username}</h2> 
+        <p>-</p> 
         <h2 className="italic text-slate-400">{user?.email}</h2>    
+
+        </div>
 
 
         <div className="flex items-center gap-3">

@@ -29,7 +29,7 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <div className="container gap-10 !h-screen border-4 border-amber-500">
+            <div className="container gap-10 !h-screen ">
             <Header  user={user}/>
             {children}
             </div>

@@ -2,19 +2,35 @@ import { CircleHelp } from "lucide-react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const ProtectedLayout = async ({ children }: { children: React.ReactNode }) => { 
-  const cookieStore = await cookies(); 
-  const authToken = cookieStore.get("auth-token")?.value; 
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/HoverCard";
+
+const ProtectedLayout = async ({ children }: { children: React.ReactNode }) => {
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get("auth-token")?.value;
 
   if (!authToken) {
-    redirect('/login');
+    redirect("/login");
   }
+
   return (
-    <div className="relative h-full w-full border-4 border-amber-400">
+    <div className="relative h-full w-full">
       {children}
-      <div className="flex mt-[20rem]">
-        <h1 className="+">Hola</h1>
-       <CircleHelp size={32}/>
+
+      <div className="absolute right-5 bottom-5">
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <div className="cursor-pointer">
+              <CircleHelp size={38} />
+            </div>
+          </HoverCardTrigger>
+          <HoverCardContent className="text-xs w-fit px-3 py-2 " side="top">
+            Preguntarle a la IA
+          </HoverCardContent>
+        </HoverCard>
       </div>
     </div>
   );

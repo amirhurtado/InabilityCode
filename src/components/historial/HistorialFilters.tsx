@@ -3,6 +3,7 @@
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 import { ListFilter } from "lucide-react";
+import { DatePickerLabeled } from "./DatePickerLabeled";
 
 type Props = {
   isAdmin?: boolean;
@@ -44,15 +45,15 @@ export default function HistorialFilters({
         )}
 
         <div className="flex gap-4">
-          <Input
-            type="date"
+          <DatePickerLabeled
+            label="Fecha inicio"
             value={startDate}
-            onChange={(e) => onStartDateChange?.(e.target.value)}
+            onChange={(date) => onStartDateChange?.(date)}
           />
-          <Input
-            type="date"
+          <DatePickerLabeled
+            label="Fecha fin"
             value={endDate}
-            onChange={(e) => onEndDateChange?.(e.target.value)}
+            onChange={(date) => onEndDateChange?.(date)}
           />
         </div>
       </div>

@@ -12,6 +12,8 @@ import {
 } from "@/app/services/disability/client";
 import { LoaderCircle } from "lucide-react";
 
+import { DatePickerLabeled } from "@/components/DatePickerLabeled";
+
 interface FormData {
   type: string;
   startDate: string;
@@ -25,10 +27,11 @@ interface FormData {
   motherIdPDF?: FileList;
 }
 
-const additionalFieldsMap: Record<string, { name: keyof FormData; label: string }[]> = {
-  "Accidente de tránsito": [
-    { name: "furipsPDF", label: "FURIPS (PDF)" },
-  ],
+const additionalFieldsMap: Record<
+  string,
+  { name: keyof FormData; label: string }[]
+> = {
+  "Accidente de tránsito": [{ name: "furipsPDF", label: "FURIPS (PDF)" }],
   "Licencia de maternidad": [
     { name: "medicalCertPDF", label: "Certificado médico tratante (PDF)" },
   ],
@@ -46,9 +49,10 @@ export default function NewDisability() {
     watch,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<FormData>();
 
-  const formRef = useRef<HTMLFormElement>(null); 
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const disabilityType = watch("type");
@@ -101,14 +105,18 @@ export default function NewDisability() {
 
     alert("Incapacidad enviada exitosamente.");
     setIsLoading(false);
-    reset(); 
+    reset();
     if (formRef.current) {
-      formRef.current.reset(); 
+      formRef.current.reset();
     }
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col gap-8"
+    >
       {/* Tipo de incapacidad */}
       <div className="flex flex-col gap-3">
         <label className="text-sm text-slate-500">Tipo de incapacidad</label>
@@ -123,41 +131,67 @@ export default function NewDisability() {
           <option value="Licencia de maternidad">Licencia de maternidad</option>
           <option value="Licencia de paternidad">Licencia de paternidad</option>
         </select>
-        {errors.type && <p className="text-red-500 text-sm">Este campo es obligatorio.</p>}
+        {errors.type && (
+          <p className="text-red-500 text-sm">Este campo es obligatorio.</p>
+        )}
       </div>
 
       {/* Fechas */}
-      <div className="grid grid-cols-2 gap-4">
-        {(["startDate", "endDate"] as (keyof FormData)[]).map((key) => (
-          <div className="flex flex-col gap-3" key={key}>
-            <label className="text-sm text-slate-500">
-              {key === "startDate" ? "Fecha de inicio" : "Fecha de fin"}
-            </label>
-            <Input type="date" {...register(key, { required: true })} />
-            {errors[key] && <p className="text-red-500 text-sm">Campo obligatorio.</p>}
-          </div>
-        ))}
+      <div className="flex gap-6">
+        <DatePickerLabeled
+          label="Fecha de inicio"
+          value={watch("startDate")}
+          onChange={(val) => setValue("startDate", val)}
+        />
+        <DatePickerLabeled
+          label="Fecha de fin"
+          value={watch("endDate")}
+          onChange={(val) => setValue("endDate", val)}
+        />
       </div>
+      {errors.startDate && (
+        <p className="text-red-500 text-sm">Campo obligatorio.</p>
+      )}
+      {errors.endDate && (
+        <p className="text-red-500 text-sm">Campo obligatorio.</p>
+      )}
 
       {/* Observaciones */}
       <div className="flex flex-col gap-3">
         <label className="text-sm text-slate-500">Observaciones</label>
-        <Textarea {...register("observations")} placeholder="Detalles adicionales (opcional)" />
+        <Textarea
+          {...register("observations")}
+          placeholder="Detalles adicionales (opcional)"
+        />
       </div>
 
       {/* PDF principal */}
       <div className="flex flex-col gap-3">
-        <label className="text-sm text-slate-500">Certificado de incapacidad (PDF)</label>
-        <Input type="file" accept="application/pdf" {...register("disabilityPDF", { required: true })} />
-        {errors.disabilityPDF && <p className="text-red-500 text-sm">Este PDF es requerido.</p>}
+        <label className="text-sm text-slate-500">
+          Certificado de incapacidad (PDF)
+        </label>
+        <Input
+          type="file"
+          accept="application/pdf"
+          {...register("disabilityPDF", { required: true })}
+        />
+        {errors.disabilityPDF && (
+          <p className="text-red-500 text-sm">Este PDF es requerido.</p>
+        )}
       </div>
 
       {/* Archivos adicionales dinámicos */}
       {additionalFieldsMap[disabilityType]?.map(({ name, label }) => (
         <div className="flex flex-col gap-3" key={name}>
           <label className="text-sm text-slate-500">{label}</label>
-          <Input type="file" accept="application/pdf" {...register(name, { required: true })} />
-          {errors[name] && <p className="text-red-500 text-sm">Este PDF es requerido.</p>}
+          <Input
+            type="file"
+            accept="application/pdf"
+            {...register(name, { required: true })}
+          />
+          {errors[name] && (
+            <p className="text-red-500 text-sm">Este PDF es requerido.</p>
+          )}
         </div>
       ))}
 

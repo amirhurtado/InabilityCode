@@ -3,7 +3,7 @@
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 import { ListFilter } from "lucide-react";
-import { DatePickerLabeled } from "./DatePickerLabeled";
+import { DatePickerLabeled } from "../DatePickerLabeled";
 
 type Props = {
   isAdmin?: boolean;
